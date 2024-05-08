@@ -9,229 +9,229 @@ typedef struct {
 } Athlete;
 
 struct Performance {
-    char event_type[50];
-    float best_time;
-    float worst_time;
-    float average_time;
+    char type_evenement[50];
+    float meilleur_temps;
+    float pire_temps;
+    float temps_moyen;
 };
-// Function to open a file with a given name and mode
-FILE* open_file(const char* filename, const char* mode) {
-    FILE* fp = fopen(filename, mode);
+// Fonction pour ouvrir un fichier avec un nom et un mode donnés
+FILE* ouvrir_fichier(const char* nom_fichier, const char* mode) {
+    FILE* fp = fopen(nom_fichier, mode);
     if (fp == NULL) {
-        printf("Error: Unable to open file '%s'\n", filename);
+        printf("Erreur : Impossible d'ouvrir le fichier '%s'\n", nom_fichier);
         exit(EXIT_FAILURE);
     }
     return fp;
 }
 
-// Function to save training data to a file
-void save_training(const char* filename, const struct Training* training) {
-    FILE* fp = open_file(filename, "ab");
-    fwrite(training, sizeof(struct Training), 1, fp);
+// Fonction pour sauvegarder les données d'entraînement dans un fichier
+void sauvegarder_entrainement(const char* nom_fichier, const struct Entrainement* entrainement) {
+    FILE* fp = ouvrir_fichier(nom_fichier, "ab");
+    fwrite(entrainement, sizeof(struct Entrainement), 1, fp);
     fclose(fp);
 }
 
-// Function to load training data from a file
-void load_training(const char* filename, struct Training* training_array, int* num_trainings) {
-    FILE* fp = open_file(filename, "rb");
+// Fonction pour charger les données d'entraînement depuis un fichier
+void charger_entrainement(const char* nom_fichier, struct Entrainement* tableau_entrainements, int* nb_entrainements) {
+    FILE* fp = ouvrir_fichier(nom_fichier, "rb");
     fseek(fp, 0, SEEK_END);
-    long size = ftell(fp);
+    long taille = ftell(fp);
     rewind(fp);
-    *num_trainings = size / sizeof(struct Training);
-    fread(training_array, sizeof(struct Training), *num_trainings, fp);
+    *nb_entrainements = taille / sizeof(struct Entrainement);
+    fread(tableau_entrainements, sizeof(struct Entrainement), *nb_entrainements, fp);
     fclose(fp);
 }
 
-// Function to create a file for a new athlete
-void create_athlete_file(const char* athlete_name) {
-    char filename[100];
-    sprintf(filename, "%s.txt", athlete_name);
-    FILE* fp = open_file(filename, "wb");
+// Fonction pour créer un fichier pour un nouvel athlète
+void creer_fichier_athlete(const char* nom_athlete) {
+    char nom_fichier[100];
+    sprintf(nom_fichier, "%s.txt", nom_athlete);
+    FILE* fp = ouvrir_fichier(nom_fichier, "wb");
     fclose(fp);
 }
 
-// Function to add training data to an athlete's file
-void add_training_to_athlete(const char* athlete_name, const struct Training* training) {
-    char filename[100];
-    sprintf(filename, "%s.txt", athlete_name);
-    save_training(filename, training);
+// Fonction pour ajouter des données d'entraînement au fichier d'un athlète
+void ajouter_entrainement_athlete(const char* nom_athlete, const struct Entrainement* entrainement) {
+    char nom_fichier[100];
+    sprintf(nom_fichier, "%s.txt", nom_athlete);
+    sauvegarder_entrainement(nom_fichier, entrainement);
 }
- // Function to add a new training session for an athlete
-void add_training_session(const char* athlete_name) {
-    struct Training new_training;
-    printf("Enter date (YYYY-MM-DD): ");
-    scanf("%s", new_training.date);
-    printf("Enter event type: ");
-    scanf("%s", new_training.event_type);
-    printf("Enter time (in seconds): ");
-    scanf("%f", &new_training.time);
-    add_training_to_athlete(athlete_name, &new_training);
+ // Fonction pour ajouter une nouvelle session d'entraînement pour un athlète
+void ajouter_session_entrainement(const char* nom_athlete) {
+    struct Entrainement nouvel_entrainement;
+    printf("Entrez la date (AAAA-MM-JJ) : ");
+    scanf("%s", nouvel_entrainement.date);
+    printf("Entrez le type d'événement : ");
+    scanf("%s", nouvel_entrainement.type_evenement);
+    printf("Entrez le temps (en secondes) : ");
+    scanf("%f", &nouvel_entrainement.temps);
+    ajouter_entrainement_athlete(nom_athlete, &nouvel_entrainement);
 }
 
-// Function to display training history for an athlete
-void display_training_history(const char* athlete_name) {
-    struct Training training_array[100]; // Assuming maximum 100 training sessions
-    int num_trainings = 0;
-    load_training(athlete_name, training_array, &num_trainings);
-    printf("\nTraining History for %s:\n", athlete_name);
+// Fonction pour afficher l'historique d'entraînement pour un athlète
+void afficher_historique_entrainements(const char* nom_athlete) {
+    struct Entrainement tableau_entrainements[100]; // En supposant un maximum de 100 sessions d'entraînement
+    int nb_entrainements = 0;
+    charger_entrainement(nom_athlete, tableau_entrainements, &nb_entrainements);
+    printf("\nHistorique d'entraînement pour %s :\n", nom_athlete);
     printf("---------------------------------------------------\n");
-    printf("Date\t\tEvent Type\t\tTime (s)\n");
+    printf("Date\t\tType d'événement\t\tTemps (s)\n");
     printf("---------------------------------------------------\n");
-    for (int i = 0; i < num_trainings; ++i) {
-        printf("%s\t%s\t\t%.2f\n", training_array[i].date, training_array[i].event_type, training_array[i].time);
+    for (int i = 0; i < nb_entrainements; ++i) {
+        printf("%s\t%s\t\t%.2f\n", tableau_entrainements[i].date, tableau_entrainements[i].type_evenement, tableau_entrainements[i].temps);
     }
 }
 
-  // Function to check if a relay training already exists for a given date
-int relay_training_exists(const char* filename, const char* date) {
-    struct Training training;
-    FILE* fp = open_file(filename, "rb");
-    while (fread(&training, sizeof(struct Training), 1, fp)) {
-        if (strcmp(training.date, date) == 0 && strcmp(training.event_type, "Relay") == 0) {
+  // Fonction pour vérifier si un entraînement en relais existe déjà pour une date donnée
+int entrainement_relais_existe(const char* nom_fichier, const char* date) {
+    struct Entrainement entrainement;
+    FILE* fp = ouvrir_fichier(nom_fichier, "rb");
+    while (fread(&entrainement, sizeof(struct Entrainement), 1, fp)) {
+        if (strcmp(entrainement.date, date) == 0 && strcmp(entrainement.type_evenement, "Relais") == 0) {
             fclose(fp);
-            return 1; // Relay training exists
+            return 1; // L'entraînement en relais existe
         }
     }
     fclose(fp);
-    return 0; // Relay training does not exist
+    return 0; // L'entraînement en relais n'existe pas
 }
 
-// Function to add a relay training session for an athlete
-void add_relay_training(const char* athlete_name) {
+// Fonction pour ajouter une session d'entraînement en relais pour un athlète
+void ajouter_entrainement_relais(const char* nom_athlete) {
     char date[20];
-    struct Training new_training;
+    struct Entrainement nouvel_entrainement;
 
-    printf("Enter date (YYYY-MM-DD): ");
+    printf("Entrez la date (AAAA-MM-JJ) : ");
     scanf("%s", date);
 
-    // Check if a relay training already exists for the given date
-    if (relay_training_exists(athlete_name, date)) {
-        printf("Error: A relay training session already exists for the given date.\n");
+    // Vérifier si un entraînement en relais existe déjà pour la date donnée
+    if (entrainement_relais_existe(nom_athlete, date)) {
+        printf("Erreur : Une session d'entraînement en relais existe déjà pour la date donnée.\n");
         return;
     }
 
-    // Populate training details
-    strcpy(new_training.date, date);
-    strcpy(new_training.event_type, "Relay");
+    // Remplir les détails de l'entraînement
+    strcpy(nouvel_entrainement.date, date);
+    strcpy(nouvel_entrainement.type_evenement, "Relais");
 
-    printf("Enter the number of participants: ");
-    int num_participants;
-    scanf("%d", &num_participants);
+    printf("Entrez le nombre de participants : ");
+    int nb_participants;
+    scanf("%d", &nb_participants);
 
-    // Validate number of participants
-    if (num_participants < 2 || num_participants > 8) {
-        printf("Error: Number of participants must be between 2 and 8.\n");
+    // Valider le nombre de participants
+    if (nb_participants < 2 || nb_participants > 8) {
+        printf("Erreur : Le nombre de participants doit être compris entre 2 et 8.\n");
         return;
     }
 
-    // Input details for each participant
-    for (int i = 0; i < num_participants; ++i) {
-        printf("Enter the position of participant %d: ", i + 1);
-        scanf("%d", &new_training.position);
-        printf("Enter the time for participant %d (in seconds): ", i + 1);
-        scanf("%f", &new_training.time);
-        // Additional input validation can be added here
+    // Saisir les détails pour chaque participant
+    for (int i = 0; i < nb_participants; ++i) {
+        printf("Entrez la position du participant %d : ", i + 1);
+        scanf("%d", &nouvel_entrainement.position);
+        printf("Entrez le temps pour le participant %d (en secondes) : ", i + 1);
+        scanf("%f", &nouvel_entrainement.temps);
+        // Validation supplémentaire peut être ajoutée ici
 
-        // Save training data for each participant
-        add_training_to_athlete(athlete_name, &new_training);
+        // Sauvegarder les données d'entraînement pour chaque participant
+        ajouter_entrainement_athlete(nom_athlete, &nouvel_entrainement);
     }
 
-    printf("Relay training session added successfully.\n");
+    printf("Session d'entraînement en relais ajoutée avec succès.\n");
 }
-// Function to calculate athlete progression between two dates
-void calculate_progression(const char* athlete_name, const char* start_date, const char* end_date) {
-    struct Training training_array[100]; // Assuming maximum 100 training sessions
-    int num_trainings = 0;
-    load_training(athlete_name, training_array, &num_trainings);
+// Fonction pour calculer la progression de l'athlète entre deux dates
+void calculer_progression(const char* nom_athlete, const char* date_debut, const char* date_fin) {
+    struct Entrainement tableau_entrainements[100]; // En supposant un maximum de 100 sessions d'entraînement
+    int nb_entrainements = 0;
+    charger_entrainement(nom_athlete, tableau_entrainements, &nb_entrainements);
     
-    // Calculate the average time of all training sessions within the specified range
-    float sum_times = 0;
+    // Calculer le temps moyen de toutes les sessions d'entraînement dans la plage spécifiée
+    float somme_temps = 0;
     int count = 0;
-    for (int i = 0; i < num_trainings; ++i) {
-        // Check if the training session date is within the specified range
-        if (strcmp(training_array[i].date, start_date) >= 0 && strcmp(training_array[i].date, end_date) <= 0) {
-            sum_times += training_array[i].time;
+    for (int i = 0; i < nb_entrainements; ++i) {
+        // Vérifier si la date de la session d'entraînement est dans la plage spécifiée
+        if (strcmp(tableau_entrainements[i].date, date_debut) >= 0 && strcmp(tableau_entrainements[i].date, date_fin) <= 0) {
+            somme_temps += tableau_entrainements[i].temps;
             ++count;
         }
     }
-    float average_time = (count > 0) ? sum_times / count : 0;
+    float temps_moyen = (count > 0) ? somme_temps / count : 0;
     
-    printf("\nProgression for %s between %s and %s:\n", athlete_name, start_date, end_date);
+    printf("\nProgression pour %s entre %s et %s :\n", nom_athlete, date_debut, date_fin);
     printf("---------------------------------------------------------------\n");
-    printf("Date\t\tEvent Type\tTime\tImprovement\tBetter than Average\n");
+    printf("Date\t\tType d'événement\tTemps\tAmélioration\tMeilleur que la moyenne\n");
     printf("---------------------------------------------------------------\n");
     
-    // Initialize variables for tracking previous time and improvement
-    float previous_time = 0.0; // Assuming no previous time for the first session
+    // Initialiser les variables pour suivre le temps précédent et l'amélioration
+    float temps_precedent = 0.0; // Supposant qu'il n'y a pas de temps précédent pour la première session
     
-    // Iterate through training sessions
-    for (int i = 0; i < num_trainings; ++i) {
-        // Check if the training session date is within the specified range
-        if (strcmp(training_array[i].date, start_date) >= 0 && strcmp(training_array[i].date, end_date) <= 0) {
-            // Calculate improvement in time compared to previous session
-            float improvement = previous_time - training_array[i].time;
+    // Parcourir les sessions d'entraînement
+    for (int i = 0; i < nb_entrainements; ++i) {
+        // Vérifier si la date de la session d'entraînement est dans la plage spécifiée
+        if (strcmp(tableau_entrainements[i].date, date_debut) >= 0 && strcmp(tableau_entrainements[i].date, date_fin) <= 0) {
+            // Calculer l'amélioration du temps par rapport à la session précédente
+            float amelioration = temps_precedent - tableau_entrainements[i].temps;
             
-            // Check if the current time is better than the average time
-            char* better_than_average = (training_array[i].time < average_time) ? "Yes" : "No";
+            // Vérifier si le temps actuel est meilleur que le temps moyen
+            char* meilleur_que_moyenne = (tableau_entrainements[i].temps < temps_moyen) ? "Oui" : "Non";
             
-            // Display progression data for the athlete
-            printf("%s\t%s\t%.2f\t%.2f\t\t%s\n", training_array[i].date, training_array[i].event_type, training_array[i].time, improvement, better_than_average);
+            // Afficher les données de progression pour l'athlète
+            printf("%s\t%s\t%.2f\t%.2f\t\t%s\n", tableau_entrainements[i].date, tableau_entrainements[i].type_evenement, tableau_entrainements[i].temps, amelioration, meilleur_que_moyenne);
             
-            // Update previous time for the next iteration
-            previous_time = training_array[i].time;
+            // Mettre à jour le temps précédent pour la prochaine itération
+            temps_precedent = tableau_entrainements[i].temps;
         }
     }
 }
-//tris 
-void swap(struct Training* a, struct Training* b) {
-    struct Training temp = *a; // We create a temporary variable to store the value of a.
-    *a = *b; // We assign the value of b to a.
-    *b = temp; // We assign the value of the temporary variable (which holds the original value of a) to b.
+//tri 
+void echanger(struct Entrainement* a, struct Entrainement* b) {
+    struct Entrainement temp = *a; // Nous créons une variable temporaire pour stocker la valeur de a.
+    *a = *b; // Nous attribuons la valeur de b à a.
+    *b = temp; // Nous attribuons la valeur de la variable temporaire (qui contient la valeur d'origine de a) à b.
 }
 
-// Bubble Sort algorithm for sorting training sessions by date
-void bubble_sort_date(struct Training training_array[], int num_trainings) {
-    for (int i = 0; i < num_trainings - 1; ++i) { // We iterate through the array.
-        for (int j = 0; j < num_trainings - i - 1; ++j) { // We iterate through the unsorted part of the array.
-            if (strcmp(training_array[j].date, training_array[j + 1].date) > 0) { // We compare adjacent elements.
-                swap(&training_array[j], &training_array[j + 1]); // If they are in the wrong order, we swap them.
+// Algorithme de tri à bulles pour trier les sessions d'entraînement par date
+void tri_a_bulles_date(struct Entrainement tableau_entrainements[], int nb_entrainements) {
+    for (int i = 0; i < nb_entrainements - 1; ++i) { // Nous parcourons le tableau.
+        for (int j = 0; j < nb_entrainements - i - 1; ++j) { // Nous parcourons la partie non triée du tableau.
+            if (strcmp(tableau_entrainements[j].date, tableau_entrainements[j + 1].date) > 0) { // Nous comparons les éléments adjacents.
+                echanger(&tableau_entrainements[j], &tableau_entrainements[j + 1]); // S'ils ne sont pas dans le bon ordre, nous les échangeons.
             }
         }
     }
 }
 
-// Insertion Sort algorithm for sorting training sessions by event type
-void insertion_sort_event_type(struct Training training_array[], int num_trainings) {
-    for (int i = 1; i < num_trainings; ++i) { // We start with the second element of the array.
-        struct Training key = training_array[i]; // We store the current element in a variable.
-        int j = i - 1; // We set j to the index before the current element.
-        while (j >= 0 && strcmp(training_array[j].event_type, key.event_type) > 0) { // We compare elements and move them to the right if they are greater than the current element.
-            training_array[j + 1] = training_array[j]; // We move elements to the right.
-            j = j - 1; // We move to the previous element.
+// Algorithme de tri par insertion pour trier les sessions d'entraînement par type d'événement
+void tri_insertion_type_evenement(struct Entrainement tableau_entrainements[], int nb_entrainements) {
+    for (int i = 1; i < nb_entrainements; ++i) { // Nous commençons par le deuxième élément du tableau.
+        struct Entrainement cle = tableau_entrainements[i]; // Nous stockons l'élément actuel dans une variable.
+        int j = i - 1; // Nous définissons j sur l'index avant l'élément actuel.
+        while (j >= 0 && strcmp(tableau_entrainements[j].type_evenement, cle.type_evenement) > 0) { // Nous comparons les éléments et les déplaçons vers la droite s'ils sont supérieurs à l'élément actuel.
+            tableau_entrainements[j + 1] = tableau_entrainements[j]; // Nous déplaçons les éléments vers la droite.
+            j = j - 1; // Nous passons à l'élément précédent.
         }
-        training_array[j + 1] = key; // We insert the current element in its correct position.
+        tableau_entrainements[j + 1] = cle; // Nous insérons l'élément actuel à sa position correcte.
     }
 }
 
-// Quick Sort algorithm for sorting training sessions by time
-int partition(struct Training training_array[], int low, int high) {
-    struct Training pivot = training_array[high]; // We choose the last element as the pivot.
-    int i = low - 1; // We set the index of the smaller element.
-    for (int j = low; j <= high - 1; ++j) { // We iterate through the array.
-        if (training_array[j].time < pivot.time) { // If the current element is smaller than the pivot.
-            ++i; // We increment the index of the smaller element.
-            swap(&training_array[i], &training_array[j]); // We swap the elements.
+// Algorithme de tri rapide pour trier les sessions d'entraînement par temps
+int partition(struct Entrainement tableau_entrainements[], int bas, int haut) {
+    struct Entrainement pivot = tableau_entrainements[haut]; // Nous choisissons le dernier élément comme pivot.
+    int i = bas - 1; // Nous définissons l'index du plus petit élément.
+    for (int j = bas; j <= haut - 1; ++j) { // Nous parcourons le tableau.
+        if (tableau_entrainements[j].temps < pivot.temps) { // Si l'élément actuel est plus petit que le pivot.
+            ++i; // Nous incrémentons l'index du plus petit élément.
+            echanger(&tableau_entrainements[i], &tableau_entrainements[j]); // Nous échangeons les éléments.
         }
     }
-    swap(&training_array[i + 1], &training_array[high]); // We swap the pivot element with the element at the correct position.
-    return (i + 1); // We return the index of the pivot element.
+    echanger(&tableau_entrainements[i + 1], &tableau_entrainements[haut]); // Nous échangeons l'élément pivot avec l'élément à la bonne position.
+    return (i + 1); // Nous retournons l'index de l'élément pivot.
 }
 
-void quick_sort_time(struct Training training_array[], int low, int high) {
-    if (low < high) { // If there is more than one element in the array.
-        int pi = partition(training_array, low, high); // We partition the array.
-        quick_sort_time(training_array, low, pi - 1); // We recursively sort the left subarray.
-        quick_sort_time(training_array, pi + 1, high); // We recursively sort the right subarray.
+void tri_rapide_temps(struct Entrainement tableau_entrainements[], int bas, int haut) {
+    if (bas < haut) { // S'il y a plus d'un élément dans le tableau.
+        int pi = partition(tableau_entrainements, bas, haut); // Nous partitionnons le tableau.
+        tri_rapide_temps(tableau_entrainements, bas, pi - 1); // Nous trions récursivement le sous-tableau gauche.
+        tri_rapide_temps(tableau_entrainements, pi + 1, haut); // Nous trions récursivement le sous-tableau droit.
     }
 }
 
@@ -256,4 +256,53 @@ void consulterPerformances(Athlete* athletes, int nbAthletes, int idAthlete) {
     }
 
     fclose(fichier);
+}
+void ajouter_athlete(Athlete* athletes, int* nbAthletes);
+void ajouter_session_entrainement(Athlete* athletes, int nbAthletes);
+void ajouter_session_relais(Athlete* athletes, int nbAthletes);
+void consulter_historique_entrainement(Athlete* athletes, int nbAthletes);
+void calculer_progression_athlete(Athlete* athletes, int nbAthletes);
+
+int main() {
+    Athlete athletes[10]; // Tableau de 10 athlètes, vous pouvez ajuster la taille selon vos besoins
+    int nbAthletes = 0; // Nombre d'athlètes
+
+    int choix;
+    do {
+        printf("\nMenu :\n");
+        printf("1. Ajouter un nouvel athlète\n");
+        printf("2. Ajouter une session d'entraînement individuelle\n");
+        printf("3. Ajouter une session d'entraînement en relais\n");
+        printf("4. Consulter l'historique d'entraînement d'un athlète\n");
+        printf("5. Calculer la progression d'un athlète\n");
+        printf("6. Quitter\n");
+        printf("Votre choix : ");
+        scanf("%d", &choix);
+
+        switch (choix) {
+            case 1:
+                ajouter_athlete(athletes, &nbAthletes);
+                break;
+            case 2:
+                ajouter_session_entrainement(athletes, nbAthletes);
+                break;
+            case 3:
+                ajouter_session_relais(athletes, nbAthletes);
+                break;
+            case 4:
+                consulter_historique_entrainement(athletes, nbAthletes);
+                break;
+            case 5:
+                calculer_progression_athlete(athletes, nbAthletes);
+                break;
+            case 6:
+                printf("Au revoir !\n");
+                break;
+            default:
+                printf("Choix invalide. Veuillez choisir un numéro entre 1 et 6.\n");
+                break;
+        }
+    } while (choix != 6);
+
+    return 0;
 }
