@@ -9,3 +9,9 @@ Gestion des épreuves (100 m, 400 m, 5000 m, marathon, relais 4x400m).
 Enregistrement des performances dans des fichiers individuels.
 Consultation de l’historique et des statistiques des athlètes.
 Sélection des meilleurs athlètes pour les compétitions.
+
+
+
+Démonstration Présentation et exécution de l’application sur notre machine
+VirtualBox(Ubuntu), utilisant la version finale disponible sur Git
+
